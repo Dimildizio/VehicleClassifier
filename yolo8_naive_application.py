@@ -1,43 +1,54 @@
 import cv2
+import torch
+#import onnx
+#import tensorrt as trt
 from ultralytics import YOLO
 
+    
+def model_inference(model_run, one_frame):
+    result = model_run(one_frame)
+    return result[0].plot()
 
-def model_inference(model, frame):
-    result = model(frame)
-    return result[0].plot()    
 
-#Define a video to work on
+# Define a video to work on
 VIDEO_LOCATION = "video_data/raw_video/output_street.avi"
-OUTPUT_LOCATION ="video_data/processed_video/street_detected.avi"
+OUTPUT_LOCATION = "video_data/processed_video/street_detected.avi"
 
-#Create a model to perform object detection
-MODEL = "yolov8s.pt"        #there are s(mall),m(edium),l(arge) and x(tended) models that vary in speed and accuaracy
+# Create a model to perform object detection
+MODEL = "yolov8s.pt"  # there are s(mall),m(edium),l(arge) and x(tended) models that vary in speed and accuracy
 model = YOLO(MODEL)
 model.fuse()
 
-# Get the video to work on, create a codead and a VideoWriter object to save the video
+# Put the model on gpu
+device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+print('current torch version is:', torch.__version__)
+print('Running device is:', device)
+model.to(device)
+#onnx_model= model.export(format="onnx", device=0)
+
+# Get the video to work on, create encoder and a VideoWriter object to save the video
 cap = cv2.VideoCapture(VIDEO_LOCATION)
 fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-size = (int(cap.get(3)), int(cap.get(4))) #width and height of original file
+size = (int(cap.get(3)), int(cap.get(4)))  # width and height of original file
 fps = 10
 output_video = cv2.VideoWriter(OUTPUT_LOCATION, fourcc, fps, size)
 
-#Check how many total frames in our original video
+# Check how many total frames in our original video
 FRAME_NUM_TO_USE = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 print('Number of frames', int(cap.get(cv2.CAP_PROP_FRAME_COUNT)))
 
 for num in range(FRAME_NUM_TO_USE):
-    #Show current frame number
+    # Show current frame number
     print(f'current frame: {num} of {FRAME_NUM_TO_USE}')
     works, frame = cap.read()
     if not works:
         break
-    #apply the model, write and show the model
+    # apply the model, write and show the model
     infer = model_inference(model, frame)
     output_video.write(infer)
-    cv2.imshow('Myframe', infer)  
-    
-    #Stop if 'q' is pressed
+    cv2.imshow('Myframe', infer)
+
+    # Stop if 'q' is pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
