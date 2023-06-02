@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 
 # Initialize the image and colors
 img_name = 'raw_pic.png'
