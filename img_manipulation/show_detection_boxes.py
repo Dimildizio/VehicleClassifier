@@ -22,9 +22,9 @@ boxes = result[0]['boxes']
 
 for box in boxes:
     x1, y1, x2, y2 = [int(num) for num in box.tolist()]
-    cv2.rectangle(img, (x1, y1, x2, y2), (10,10,10), 2)
+    cv2.rectangle(img, (x1, y1, x2, y2), (10, 10, 10), 2)
 
-cv2.imshow('Boxes',img)
+cv2.imshow('Boxes', img)
 cv2.imwrite('show_detect_boxes.png', img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()

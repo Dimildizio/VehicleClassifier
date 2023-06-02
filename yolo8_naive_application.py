@@ -1,7 +1,5 @@
 import cv2
 import torch
-#import onnx
-#import tensorrt as trt
 from ultralytics import YOLO
 
     
@@ -24,7 +22,6 @@ device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cp
 print('current torch version is:', torch.__version__)
 print('Running device is:', device)
 model.to(device)
-#onnx_model= model.export(format="onnx", device=0)
 
 # Get the video to work on, create encoder and a VideoWriter object to save the video
 cap = cv2.VideoCapture(VIDEO_LOCATION)
