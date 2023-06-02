@@ -3,7 +3,7 @@ import torch
 import torchvision
 from torchvision import transforms
 from torchvision.models.detection import ssdlite320_mobilenet_v3_large
-
+import time
 # Define the class labels. python 3.8 doesn't support torchvision with coco. the list is not full. here are more than 90
 all_class_labels = {1: 'person', 2: 'bicycle', 3: 'car', 4: 'motorcycle', 5: 'airplane', 6: 'bus',
                     7: 'train', 8: 'truck', 9: 'boat', 10: 'traffic light', 11: 'fire hydrant',
@@ -33,8 +33,13 @@ model.eval()
 transform = transforms.Compose([
     transforms.ToTensor()])
 
+start_time = time.time()
+# Detection interval in seconds
+interval = 1.0
+COUNTER = 0
 
 def perform_object_detection(frame):  # , tracker):
+    global COUNTER
     # Preprocess the frame
     input_tensor = transform(frame).unsqueeze(0)
 
@@ -46,14 +51,18 @@ def perform_object_detection(frame):  # , tracker):
     boxes = predictions[0]['boxes']
     labels = predictions[0]['labels']
     scores = predictions[0]['scores']
-
     # Apply confidence threshold
     confidence_threshold = 0.5
 
     filtered_boxes = [box for box, score, label in zip(boxes, scores, labels) if score > confidence_threshold]
     filtered_scores = [score for score, label in zip(scores, labels) if score > confidence_threshold]
     filtered_labels = [label for score, label in zip(scores, labels) if score > confidence_threshold]
-
+    try:
+        if any(class_labels[label.item()] in ['bus', 'truck'] for label in filtered_labels):
+            cv2.imwrite(f'detected_vehicle{COUNTER}.png', frame)
+            COUNTER+=1
+    except KeyError as ke:
+        print(ke)
     # If there are any objects detected
     if len(filtered_boxes) > 0:
         filtered_boxes = torch.stack(filtered_boxes)
@@ -95,6 +104,7 @@ def perform_object_detection(frame):  # , tracker):
 video_device = 1
 cap = cv2.VideoCapture(video_device)
 
+print('start streaming')
 while cap.isOpened():
     ret, frame = cap.read()
     # For tracker
@@ -109,7 +119,10 @@ while cap.isOpened():
 
     # with no tracker
     if ret:
-        frame = perform_object_detection(frame)
+        time_left = time.time() - start_time
+        if time_left > interval:
+            frame = perform_object_detection(frame)
+            start_time = time.time()
         cv2.imshow('Frame', frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
