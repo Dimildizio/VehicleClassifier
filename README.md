@@ -104,4 +104,9 @@ After all the required actions and reconciliations done, the blocks will be repl
 
 ![road_in_process](https://github.com/Dimildizio/VehicleClassifier/assets/42382713/f533561c-4a64-4078-8b07-244e9f216899)
 
+The roadsigns have been installed as well, notifying drivers about the deadend.
+
+![image](https://github.com/Dimildizio/VehicleClassifier/assets/42382713/66f7cd7e-da45-4e7a-a170-4e7b25b3522b)
+
+
 Also on the brighter side, the problem has attracted lots of attention and I was able to force and speed up road works aimed to repare the roadbed. 
